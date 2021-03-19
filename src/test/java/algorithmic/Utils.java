@@ -3,12 +3,12 @@ package algorithmic;
 public class Utils {
     public static String add(String s1, String s2) {
 
-        String longest = reverse(s1);
-        String shortest = reverse(s2);
+        String longest = new StringBuilder(s1).reverse().toString();
+        String shortest = new StringBuilder(s2).reverse().toString();
 
         if (s1.length() < s2.length()) {
-            longest = reverse(s2);
-            shortest = reverse(s1);
+            longest = new StringBuilder(s2).reverse().toString();
+            shortest = new StringBuilder(s1).reverse().toString();
         }
 
         int[] collector = new int[longest.length() + 1];
@@ -49,10 +49,6 @@ public class Utils {
         }
 
         return sb.toString();
-    }
-
-    public static String reverse(String toString) {
-        return new StringBuilder(toString).reverse().toString();
     }
 
 }

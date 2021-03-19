@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static algorithmic.Utils.reverse;
-
 @DisplayName("""
         You are given two non-empty linked lists representing two non-negative integers.
         The digits are stored in reverse order, and each of their nodes contains a single digit.
@@ -68,8 +66,8 @@ class AddTwoNumbersTest {
     @Test
     void exampleWithAddTwoNumbers1() {
 
-        ListNode l1 = fromDigitString(reverse("243"));
-        ListNode l2 = fromDigitString(reverse("564"));
+        ListNode l1 = fromDigitString(new StringBuilder("243").reverse().toString());
+        ListNode l2 = fromDigitString(new StringBuilder("564").reverse().toString());
 
         ListNode listNode = addTwoNumbers(l1, l2);
 
@@ -90,8 +88,8 @@ class AddTwoNumbersTest {
             """)
     @Test
     void failedLeetCodeTest() {
-        ListNode l1 = fromDigitString(reverse("249"));
-        ListNode l2 = fromDigitString(reverse("5649"));
+        ListNode l1 = fromDigitString(new StringBuilder("249").reverse().toString());
+        ListNode l2 = fromDigitString(new StringBuilder("5649").reverse().toString());
 
         Assertions.assertEquals("10407", toDigitString(addTwoNumbers(l1, l2)));
     }
