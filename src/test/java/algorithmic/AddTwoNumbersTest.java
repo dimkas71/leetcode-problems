@@ -2,9 +2,10 @@ package algorithmic;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @DisplayName("""
         You are given two non-empty linked lists representing two non-negative integers.
@@ -48,34 +49,45 @@ class AddTwoNumbersTest {
     """)
     @Test
     void example1() {
-        ListNode l1 = fromArray(new int[]{2, 4, 3});
-        ListNode l2 = fromArray(new int[]{5, 6, 4});
+        ListNode l1 = fromDigitString("243");
+        ListNode l2 = fromDigitString("564");
+        ListNode result = addTwoNumbers(l1, l2);
 
-        long value1 = toReversedLong(l1);
-        long value2 = toReversedLong(l2);
-        long result = value1 + value2;
+        Assertions.assertEquals(7, result.val);
+        Assertions.assertEquals(0, result.next.val);
+        Assertions.assertEquals(8, result.next.next.val);
 
-        Assertions.assertArrayEquals(new int[]{7,0,8}, toArray(fromLongReversed(result)));
     }
     @DisplayName("""
         Example 1:
-        Input: l1 = [2,4,3], l2 = [5,6,4]
-        Output: [7,0,8]
-        Explanation: 342 + 465 = 807.
+        Input: l1 = [0], l2 = [0]
+        Output: [0]
+        Explanation: 0 + 0 = 0.
     """)
     @Test
-    void exampleWithAddTwoNumbers1() {
+    void example2() {
+        ListNode l1 = fromDigitString("0");
+        ListNode l2 = fromDigitString("0");
+        ListNode result = addTwoNumbers(l1, l2);
 
-        ListNode l1 = fromDigitString(new StringBuilder("243").reverse().toString());
-        ListNode l2 = fromDigitString(new StringBuilder("564").reverse().toString());
-
-        ListNode listNode = addTwoNumbers(l1, l2);
-
-        Assertions.assertEquals("708", toDigitString(listNode));
-
+        Assertions.assertEquals(0, result.val);
+        Assertions.assertNull(result.next);
 
     }
 
+    @Test
+    @DisplayName("""
+        Input: l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]
+        Output: [8,9,9,9,0,0,0,1]
+            """)
+    void example3() {
+        ListNode l1 = fromDigitString("9999999");
+        ListNode l2 = fromDigitString("9999");
+        ListNode result = addTwoNumbers(l1, l2);
+
+        Assertions.assertEquals("89990001",toDigitString(result));
+
+    }
 
     @DisplayName("""
             Input:
@@ -88,174 +100,129 @@ class AddTwoNumbersTest {
             """)
     @Test
     void failedLeetCodeTest() {
-        ListNode l1 = fromDigitString(new StringBuilder("249").reverse().toString());
-        ListNode l2 = fromDigitString(new StringBuilder("5649").reverse().toString());
+        ListNode l1 = fromDigitString("249");
+        ListNode l2 = fromDigitString("5649");
+        ListNode result = addTwoNumbers(l1, l2);
 
-        Assertions.assertEquals("10407", toDigitString(addTwoNumbers(l1, l2)));
+        Assertions.assertEquals(7, result.val);
+        Assertions.assertEquals(0, result.next.val);
+        Assertions.assertEquals(4, result.next.next.val);
+        Assertions.assertEquals(0, result.next.next.next.val);
+        Assertions.assertEquals(1, result.next.next.next.next.val);
+        Assertions.assertNull(result.next.next.next.next.next);
+
+    }
+
+    @Nested
+    @DisplayName("""
+            For testing toDigitString and fromDigitString methods
+            For example: 
+                "249" -> Should be transformed to ListNode("249") without reversing
+            """)
+    class ListNodeToAndFromStringTest {
+
+        @Test
+        @DisplayName("""
+                ListNode (249) -> 249
+                """)
+        void testToDigitStringMethod() {
+            ListNode actual = new ListNode(2, new ListNode(4, new ListNode(9)));
+            String result = toDigitString(actual);
+
+            Assertions.assertEquals("249", result, () -> "Should be equal");
+
+            actual = new ListNode(2);
+            result = toDigitString(actual);
+
+            Assertions.assertEquals("2", result, () -> "Should be equal to 2");
+
+        }
+
+        @Test
+        @DisplayName("""
+                reverse String "249" should be converted to List(249)
+                """)
+        void testFromDigitStringMethod() {
+            ListNode root = fromDigitString("249");
+            Assertions.assertEquals(2, root.val);
+            Assertions.assertEquals(4, root.next.val);
+            Assertions.assertEquals(9, root.next.next.val);
+
+            root = fromDigitString("1");
+            Assertions.assertEquals(1, root.val);
+            Assertions.assertNull(root.next);
+
+
+        }
+
     }
 
     @DisplayName("""
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-            [5,6,4]
+        Adding string as an array of digits as numbers. For example
+        "10001" + "543" should be "10544"
+        """)
+    class AddStringOfDigitsAsNumbersTest {
+
+        @DisplayName("""
+            "0" + "0" should be equal "0"
             """)
-    @Test
-    void failedBigNumberLeetCodeTest() {
+        @Test
+        void zeroStringPlusZeroString() {
 
-    }
+            String s1 = "0";
+            String s2 = "0";
 
+            Assertions.assertEquals("0", add(s1, s2));
 
+        }
 
-    private ListNode fromLongReversed(long result) {
-        return fromArray(Arrays.stream(
-                                new StringBuilder().append(String.valueOf(result)).reverse().toString().split("")
-                            ).mapToInt(s -> Integer.parseInt(s))
-                             .toArray()
-        );
+        @ParameterizedTest(name = "{0} + {1} = {2}")
+        @CsvSource({
+                "0, 0, 0",
+                "0, 1, 1",
+                "101, 1, 102",
+                "342, 465, 807",
+                "9999999, 9999, 10009998",
+                "10001, 543, 10544",
+                "10003, 543, 10546",
+                "942, 9465, 10407"
+
+        })
+        void stringAddingTests(String s1, String s2, String expected) {
+            Assertions.assertEquals(expected, add(s1, s2));
+        }
 
     }
 
     private ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        return fromDigitString(Utils.add(toDigitString(l1), toDigitString(l2)));
+        //All logic for this task demands all strings should be reverted
+
+        String s1 = new StringBuilder(toDigitString(l1)).reverse().toString();
+        String s2 = new StringBuilder(toDigitString(l2)).reverse().toString();
+        String result = new StringBuilder(add(s1, s2)).reverse().toString();
+
+        return fromDigitString(result);
     }
 
-    private long toLong(ListNode ln) {
-        if (ln == null) return 0;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(ln.val);
-        ListNode next = ln.next;
-
-        while (next != null) {
-            sb.append(next.val);
-            next = next.next;
-        }
-
-        return Long.parseLong(sb.reverse().toString());
-
-    }
-
-    private ListNode fromLong(long l) {
-        if (l == 0) return new ListNode(0);
-        String[] tmp = String.valueOf(l).split(""); //["8", "0", "7"] it needs a reverse order here...
-        String[] splitted = new String[tmp.length];
-        int pointer = tmp.length - 1;
-
-        while (pointer >= 0) {
-            splitted[tmp.length - 1 - pointer] = tmp[pointer];
-            pointer--;
-        }
-
-        if (splitted.length == 1) return new ListNode(Integer.parseInt(splitted[0]));
-
-        int i = 0;
-        int j = 1;
-
-        ListNode root = new ListNode(Integer.parseInt(splitted[i]));
-
-        ListNode current = new ListNode(Integer.parseInt(splitted[j]));
-        root.next = current;
-
-        while (j < splitted.length - 1) {
-            i++; j++;
-            ListNode temp = current;
-            current = new ListNode(Integer.parseInt(splitted[j]));
-            temp.next = current;
-        }
-
-        return root;
-    }
-
-    private ListNode fromArray(int[] array) {
-        if ((array == null) || (array.length == 0)) return null;
-        if (array.length == 1) return new ListNode(array[0]);
-        //At this point the array's length is greater than 1!!!;
-
-        int i = 0;
-        int j = 1;
-        ListNode root = new ListNode(array[i]);
-        ListNode current = new ListNode(array[j]);
-        root.next = current;
-
-        while (j < array.length - 1) {
-            i++;j++;
-            ListNode temp = current;
-            current = new ListNode(array[j]);
-            temp.next = current;
-
-        }
-        return root;
-    }
-
-    private int[] toArray(final ListNode node) {
-        if (node == null) return new int[]{};
-
-        int size = 1;
-        ListNode next = node.next;
-        while (next != null) {
-            size++;
-            next = next.next;
-        }
-
-        int[] result = new int[size];
-        int index = 0;
-        result[index++] = node.val;
-
-        next = node.next;
-        while (next != null) {
-            result[index++] = next.val;
-            next = next.next;
-        }
-
-        return result;
-
-
-    }
-
-    private long toReversedLong(final ListNode node) {
-        if (node == null) return 0;
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(node.val);
-        ListNode next = node.next;
-
-        while (next != null) {
-            sb.append(next.val);
-            next = next.next;
-        }
-
-        return Long.parseLong(sb.reverse().toString());
-    }
-
-    private ListNode fromDigitString(String from) {
+    private ListNode fromDigitString(String from) { //807
         if (from == null || from.isEmpty()) return null;
         if (from.length() == 1) return new ListNode(Integer.parseInt(from));
 
         String[] tmp = from.split("");
-        String[] splitted = new String[tmp.length];
-        int pointer = tmp.length - 1;
 
-        while (pointer >= 0) {
-            splitted[tmp.length - 1 - pointer] = tmp[pointer];
-            pointer--;
-        }
+        int currentPointer = 1;
 
-        if (splitted.length == 1) return new ListNode(Integer.parseInt(splitted[0]));
+        ListNode root = new ListNode(Integer.parseInt(tmp[0]));
 
-        int i = 0;
-        int j = 1;
-
-        ListNode root = new ListNode(Integer.parseInt(splitted[i]));
-
-        ListNode current = new ListNode(Integer.parseInt(splitted[j]));
+        ListNode current = new ListNode(Integer.parseInt(tmp[currentPointer]));
         root.next = current;
 
-        while (j < splitted.length - 1) {
-            i++; j++;
-            ListNode temp = current;
-            current = new ListNode(Integer.parseInt(splitted[j]));
-            temp.next = current;
-        }
+        while (currentPointer < tmp.length - 1) {
+            ListNode memoized = current;
+            current = new ListNode(Integer.parseInt(tmp[++currentPointer]));
+            memoized.next = current;
 
+        }
         return root;
     }
 
@@ -272,6 +239,59 @@ class AddTwoNumbersTest {
         }
         return sb.toString();
     }
+
+    public static String add(String s1, String s2) {
+        String longest = s1;
+        String shortest = s2;
+
+        if (s2.length() > s1.length()) {
+            longest = s2;
+            shortest = s1;
+        }
+        int i = longest.length() - 1;
+        int j = shortest.length() - 1;
+
+        int[] collector = new int[longest.length() + 1];
+
+        int accumulator = 0;
+        while (i >= 0) {
+            int firstDigit = Integer.parseInt(String.valueOf(longest.charAt(i)));
+            int secondDigit = 0;
+
+            if (j >= 0 ) {
+                secondDigit = Integer.parseInt(String.valueOf(shortest.charAt(j)));
+            }
+
+            int result = firstDigit + secondDigit + accumulator;
+
+            if (result > 9) {
+                accumulator = 1;
+                result = result - 10;
+            } else {
+                accumulator = 0;
+            }
+
+            collector[longest.length() - 1 - i] = result;
+            i--; j--;
+        }
+
+        int arraySize = longest.length();
+
+        if (accumulator > 0) {
+            collector[longest.length()] = accumulator;
+            arraySize += 1;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int k = arraySize - 1; k >= 0; k--) {
+            sb.append(collector[k]);
+        }
+
+        return sb.toString();
+
+    }
+
+
 }
 
 class ListNode {
